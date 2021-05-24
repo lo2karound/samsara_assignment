@@ -1,9 +1,10 @@
 """ Fleet.py
 """
 import abc
+import time
 from typing import List
 
-from matplotlib import pyplot as plt
+import folium
 
 from src.location.Location import Location
 from src.vehicle.Vehicle import Vehicle
@@ -32,12 +33,18 @@ class Fleet(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     def plot_locations(self):
-        """Method to plot the most recent locations.
-        TODO: (siddharth) Update background to a map layer"""
+        """Method to plot the most recent locations."""
         vehicles = self.vehicles()
         latitudes = [vehicle.latest_location.latitude for vehicle in vehicles]
         longitudes = [vehicle.latest_location.longitude for vehicle in vehicles]
-        plt.plot(longitudes, latitudes, 'rs')
-        plt.xlabel("Longitude")
-        plt.ylabel("Latitude")
-        plt.show()
+        map = folium.Map(location=[self.home_base.latitude, self.home_base.longitude], tiles='Stamen Toner', zoom_start=5)
+        for i in range(len(latitudes)):
+            folium.CircleMarker(
+                location=(latitudes[i], longitudes[i]),
+                popup=vehicles[i].vehicle_id,
+                radius=10,
+                color="#3186cc",
+                fill=True,
+                fill_color="#3186cc"
+            ).add_to(map)
+        map.save("{}.html".format(time.time()))
